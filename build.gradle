@@ -34,8 +34,9 @@ dependencies {
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:kafka'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'com.github.tomakehurst:wiremock-jre8-standalone:2.35.0'
+    testImplementation 'com.github.tomakehurst:wiremock-jre8-standalone:2.35.1'
     testImplementation 'javax.servlet:javax.servlet-api:4.0.1'
+    testImplementation 'com.deployagram:deployagram-annotations-junit5:1.0.3'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'}
 
 tasks.named('test') {

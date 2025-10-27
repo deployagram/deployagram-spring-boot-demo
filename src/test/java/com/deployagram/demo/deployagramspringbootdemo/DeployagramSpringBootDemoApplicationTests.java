@@ -1,5 +1,8 @@
 package com.deployagram.demo.deployagramspringbootdemo;
 
+import com.github.deployagram.annotations.junit5.Deployagram;
+import com.github.deployagram.annotations.junit5.DeployagramConfig;
+import com.github.deployagram.annotations.junit5.DeployagramConfigEntry;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.AfterAll;
@@ -23,18 +26,26 @@ import static org.awaitility.Awaitility.await;
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
 @ContextConfiguration(initializers = DeployagramSpringBootDemoApplicationTests.Initializer.class)
+@Deployagram(startEnvironment = true, shareHostPorts = {DeployagramSpringBootDemoApplicationTests.WIREMOCK_PORT_NUMBER}, proxyPort = DeployagramSpringBootDemoApplicationTests.DEPLOYAGRAM_HTTP_PROXY_PORT)
+@DeployagramConfig({
+        @DeployagramConfigEntry(key = "proxy.namesOfSourceApps.Emailer", value = "DontForget"),
+        @DeployagramConfigEntry(key = "proxy.proxiedAppNames.Emailer", value = "Emailer"),
+        @DeployagramConfigEntry(key = "proxy.proxiedApps.Emailer", value = "http://host.testcontainers.internal:8085/Emailer"),
+})
 class DeployagramSpringBootDemoApplicationTests {
 
     private static final String SUGGESTIONS_TOPIC = "SuppliedSuggestionsTopic";
+    static final int WIREMOCK_PORT_NUMBER = 8085;
+    static final int DEPLOYAGRAM_HTTP_PROXY_PORT = 9090;
 
-    private static WireMockServer wireMockServer = new WireMockServer(options().dynamicPort());
+    private static WireMockServer wireMockServer = new WireMockServer(options().port(WIREMOCK_PORT_NUMBER));
 
     static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
         public void initialize(ConfigurableApplicationContext context) {
             wireMockServer.start();
             TestPropertyValues.of(
-                    "external.api.base-url=http://localhost:" + wireMockServer.port()
+                    "external.api.base-url=http://localhost:" + DEPLOYAGRAM_HTTP_PROXY_PORT
             ).applyTo(context.getEnvironment());
         }
     }
@@ -49,7 +60,7 @@ class DeployagramSpringBootDemoApplicationTests {
     void setup() {
         WireMock.configureFor("localhost", wireMockServer.port());
 
-        stubFor(post(urlEqualTo("/Emailer/email/test@deployagram.com"))
+        stubFor(post(urlEqualTo("/Emailer/email"))
                 .withHeader("Content-Type", equalTo("application/json"))
                 .withHeader("Accept", equalTo("application/json"))
                 .withRequestBody(equalToJson("""
