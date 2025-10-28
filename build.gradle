@@ -37,6 +37,7 @@ dependencies {
     testImplementation 'com.github.tomakehurst:wiremock-jre8-standalone:2.35.1'
     testImplementation 'javax.servlet:javax.servlet-api:4.0.1'
     testImplementation 'com.deployagram:deployagram-annotations-junit5:1.0.3'
+    testImplementation 'com.deployagram:deployagram-kafka-interceptors:1.0.0'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'}
 
 tasks.named('test') {
